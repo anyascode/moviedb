@@ -41,22 +41,4 @@ class MoviesList extends Component {
   }
 }
 
-// function MoviesList({ movielist }) {
-//   return (
-//     <div className="movies-list">
-//       <Row gutter={[32, 32]}>
-//         {movielist.map((movie) => (
-//           <Col span={12} key={movie.id}>
-//             <MovieCard title={movie.title} description={movie.description} posterUrl={movie.poster} date={movie.date} />
-//           </Col>
-//         ))}
-//       </Row>
-//     </div>
-//   );
-// }
-
-MoviesList.propTypes = {
-  movielist: PropTypes.array,
-};
-
 export default MoviesList;
