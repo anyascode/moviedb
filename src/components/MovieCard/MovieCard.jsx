@@ -37,7 +37,7 @@ function MovieCard({ title, description, posterUrl, date }) {
       <Card className="movie-card" bodyPadding="0">
         <Flex justify="space-between">
           <Col span={10}>
-            <Image src={`https://image.tmdb.org/t/p/original${posterUrl}`} alt="" />
+            <Image src={posterUrl} alt="" />
           </Col>
           <Col span={14} className="movie-info">
             <h5 className="movie-title">{title}</h5>
