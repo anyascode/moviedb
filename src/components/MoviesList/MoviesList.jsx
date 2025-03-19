@@ -116,6 +116,7 @@ class MoviesList extends Component {
           defaultCurrent={1}
           total={totalCount}
           showSizeChanger={false}
+          pageSize={movies.length}
           onChange={this.handlePagination}
         />
       </div>
