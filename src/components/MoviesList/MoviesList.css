@@ -1,6 +1,9 @@
 .movies-list {
   padding: 21px 32px;
   background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
 }
 
 .loader {

@@ -1,4 +1,4 @@
-const url = 'https://api.themoviedb.org/3/search/movie?query=returnhh&include_adult=false&language=en-US&page=1';
+// const url = 'https://api.themoviedb.org/3/search/movie?query=returnhh&include_adult=false&language=en-US&page=1';
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
 const options = {
@@ -10,9 +10,12 @@ const options = {
 };
 
 export default class MovieService {
-  async fetchMovies() {
+  async fetchMovies(query) {
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/movie?query=${query}&include_adult=false&language=en-US&page=1`,
+        options
+      );
       if (!response.ok) {
         throw new Error(`${response.text}`);
       }
