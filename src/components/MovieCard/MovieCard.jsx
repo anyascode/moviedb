@@ -35,6 +35,8 @@ class MovieCard extends Component {
 
   render() {
     const { title, description, posterUrl, date, rating, vote, genres } = this.props;
+    const ratedMovie = this.context.ratedMovies.find((movie) => movie.id === this.props.id);
+
     let formattedDate = '';
     if (date) {
       try {
@@ -76,7 +78,7 @@ class MovieCard extends Component {
                 <Tag className="movie-tag">{genres}</Tag> <Tag className="movie-tag">Drama</Tag>
               </div>
               <p className="movie-description">{this.truncateString(description, 24)}</p>
-              <Rate count={10} onChange={this.handleRate} value={rating} />
+              <Rate count={10} onChange={this.handleRate} value={ratedMovie?.rating} />
             </Col>
           </Flex>
         </Card>

@@ -9,23 +9,21 @@ export class SessionProvider extends Component {
     super(props);
     this.state = {
       session_id: '',
+      ratedMovies: [],
     };
   }
 
-  componentDidMount() {
-    this.getSessionId();
-  }
+  async componentDidMount() {
+    const session = await themoviedb.getGuestSession();
+    const ratedMovies = await themoviedb.getRatedMovies(session.guest_session_id);
 
-  async getSessionId() {
-    try {
-      const guestSession = await themoviedb.getGuestSession();
-      this.setState({ session_id: guestSession.guest_session_id });
-    } catch (err) {
-      console.log(err);
-    }
+    this.setState({
+      sessionId: session.guest_session_id,
+      ratedMovies,
+    });
   }
 
   render() {
-    return <SessionContext.Provider value={this.state.session_id}>{this.props.children}</SessionContext.Provider>;
+    return <SessionContext.Provider value={this.state}>{this.props.children}</SessionContext.Provider>;
   }
 }
