@@ -1,19 +1,19 @@
 import MovieCard from '../MovieCard/MovieCard.jsx';
 import Error from '../Error/Error.jsx';
-import { Col, Input, Row, Spin, Pagination } from 'antd';
-import './MoviesList.css';
+import { Col, Row, Spin, Pagination } from 'antd';
+import '../MoviesList/MoviesList.css';
 import { Component } from 'react';
-import { debounce } from 'lodash';
-import { getMovies } from '../../services/themoviedb.js';
+import { getRatedMovies } from '../../services/themoviedb.js';
+import { SessionContext } from '../../context/session.jsx';
 
-class MoviesList extends Component {
+class RatedList extends Component {
+  static contextType = SessionContext;
   state = {
     movies: [],
     loading: false,
     error: false,
     totalCount: 0,
     currentPage: 1,
-    searchQuery: 'A',
   };
 
   componentDidMount() {
@@ -26,19 +26,13 @@ class MoviesList extends Component {
     }
   }
 
-  handleChange = (e) => {
-    this.setState({ searchQuery: e.target.value }, () => {
-      this.fetchMovies(this.state.searchQuery, this.state.currentPage);
-    });
-  };
-
   handlePagination = (pageNum) => {
     this.setState((prev) => ({ ...prev, currentPage: pageNum }));
   };
 
-  async fetchMovies(query, page) {
+  async fetchMovies() {
     this.setState((prev) => ({ ...prev, loading: true, error: false }));
-    const data = await getMovies(query, page);
+    const data = await getRatedMovies(this.context);
 
     const movies = data.results.map((movie) => ({
       title: movie.title,
@@ -47,6 +41,7 @@ class MoviesList extends Component {
       description: movie.overview,
       genres: movie.genre_ids,
       id: movie.id,
+      rating: movie.rating,
       vote: movie.vote_average,
     }));
     this.setState((prev) => ({
@@ -63,7 +58,6 @@ class MoviesList extends Component {
 
     return (
       <div className="movies-list">
-        <Input onChange={debounce(this.handleChange, 3000)} placeholder="Type to search..." />
         {error ? <Error /> : null}
         {loading ? (
           <div className="loader">
@@ -80,8 +74,8 @@ class MoviesList extends Component {
                   description={movie.description}
                   posterUrl={movie.poster}
                   date={movie.date}
+                  rating={movie.rating}
                   vote={movie.vote}
-                  genres={movie.genres}
                 />
               </Col>
             ))}
@@ -100,4 +94,4 @@ class MoviesList extends Component {
   }
 }
 
-export default MoviesList;
+export default RatedList;
