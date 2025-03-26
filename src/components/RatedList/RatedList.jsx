@@ -32,7 +32,6 @@ class RatedList extends Component {
   async fetchMovies() {
     this.setState((prev) => ({ ...prev, loading: true, error: false }));
     const { movies, totalResults } = await this.context.getRatedMovies();
-    console.log(movies);
     this.setState((prev) => ({
       ...prev,
       movies,

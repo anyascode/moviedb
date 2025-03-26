@@ -57,7 +57,6 @@ export class TheMovieDBProvider extends Component {
   }
 
   async getRatedMovies() {
-    console.log(this.state.sessionId);
     const data = await themoviedb.getRatedMovies(this.state.sessionId);
 
     return {
