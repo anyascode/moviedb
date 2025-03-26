@@ -53,7 +53,7 @@ class MoviesList extends Component {
   render() {
     const { searchQuery, loading, movies, error, totalCount, currentPage } = this.state;
     const hasData = !loading && !error;
-    console.log(totalCount);
+
     return (
       <div className="movies-list">
         <Input

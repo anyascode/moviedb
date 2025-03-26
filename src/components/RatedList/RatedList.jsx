@@ -41,7 +41,7 @@ class RatedList extends Component {
     }));
   }
   render() {
-    const { loading, movies, error, totalCount } = this.state;
+    const { loading, movies, error, totalCount, currentPage } = this.state;
     const hasData = !loading && !error;
 
     return (
@@ -75,8 +75,9 @@ class RatedList extends Component {
           defaultCurrent={1}
           total={totalCount}
           showSizeChanger={false}
-          pageSize={movies.length}
+          pageSize={20}
           onChange={this.handlePagination}
+          current={currentPage}
         />
       </div>
     );
