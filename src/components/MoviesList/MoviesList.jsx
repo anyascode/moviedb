@@ -51,9 +51,9 @@ class MoviesList extends Component {
     }));
   }
   render() {
-    const { searchQuery, loading, movies, error, totalCount } = this.state;
+    const { searchQuery, loading, movies, error, totalCount, currentPage } = this.state;
     const hasData = !loading && !error;
-
+    console.log(totalCount);
     return (
       <div className="movies-list">
         <Input
@@ -70,7 +70,7 @@ class MoviesList extends Component {
         {hasData ? (
           <Row gutter={[32, 32]}>
             {movies.map((movie) => (
-              <Col xl={12} key={movie.id}>
+              <Col lg={12} key={movie.id}>
                 <MovieCard
                   id={movie.id}
                   title={movie.title}
@@ -89,8 +89,9 @@ class MoviesList extends Component {
           defaultCurrent={1}
           total={totalCount}
           showSizeChanger={false}
-          pageSize={movies.length}
+          pageSize={20}
           onChange={this.handlePagination}
+          current={currentPage}
         />
       </div>
     );
