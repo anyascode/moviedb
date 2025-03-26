@@ -1,14 +1,12 @@
-import { Card, Tag, Col, Flex, ConfigProvider, Image, Rate } from 'antd';
-import PropTypes from 'prop-types';
-import './MovieCard.css';
+import { Card, Tag, Col, Flex, ConfigProvider, Image, Rate, Row } from 'antd';
 import { format, parseISO } from 'date-fns';
-import { rateMovie } from '../../services/themoviedb.js';
-import { SessionContext } from '../../context/session.jsx';
+import PropTypes from 'prop-types';
 import { Component } from 'react';
-import { GenreContext } from '../../context/genres.jsx';
+import { TheMovieDBContext } from '../../context/themoviedb.jsx';
+import './MovieCard.css';
 
 class MovieCard extends Component {
-  static contextType = SessionContext;
+  static contextType = TheMovieDBContext;
 
   constructor() {
     super();
@@ -18,7 +16,7 @@ class MovieCard extends Component {
   }
 
   async handleRate(rating) {
-    await rateMovie(this.props.id, this.context, rating);
+    await this.context.rateMovie(this.props.id, rating);
   }
 
   truncateString(str, maxLength) {
@@ -34,10 +32,9 @@ class MovieCard extends Component {
   }
 
   render() {
-    const { title, description, posterUrl, date, rating, vote, genres } = this.props;
-    const ratedMovie = this.context.ratedMovies.find((movie) => movie.id === this.props.id);
-
-    let formattedDate = '';
+    const { title, description, posterUrl, date, vote, genres, id } = this.props;
+    const rating = this.context.ratings[id];
+    let formattedDate = 'Coming soon';
     if (date) {
       try {
         formattedDate = format(parseISO(date), 'MMMM d, y');
@@ -55,15 +52,18 @@ class MovieCard extends Component {
             Card: {
               bodyPadding: 0,
             },
+            Rate: {
+              starSize: 15,
+            },
           },
         }}
       >
-        <Card className="movie-card" bodyPadding="0">
-          <Flex justify="space-between">
-            <Col span={10}>
-              <Image src={posterUrl} alt="" />
+        <Card className="movie-card">
+          <Row>
+            <Col xl={10} sm={8} xs={6} md={9}>
+              <Image src={posterUrl} alt={`${title} poster`} />
             </Col>
-            <Col span={14} className="movie-info">
+            <Col xl={14} sm={16} xs={18} md={15} className="movie-info">
               <h5 className="movie-title">
                 {title}{' '}
                 <span
@@ -72,15 +72,18 @@ class MovieCard extends Component {
                   {averageRating}
                 </span>
               </h5>
-
               <p className="movie-date">{formattedDate}</p>
               <div className="movie-tags">
-                <Tag className="movie-tag">{genres}</Tag> <Tag className="movie-tag">Drama</Tag>
+                {genres.map((genre) => (
+                  <Tag key={genre} className="movie-tag">
+                    {genre}
+                  </Tag>
+                ))}{' '}
               </div>
-              <p className="movie-description">{this.truncateString(description, 24)}</p>
-              <Rate count={10} onChange={this.handleRate} value={ratedMovie?.rating} />
+              <p className="movie-description">{this.truncateString(description, 20)}</p>
+              <Rate count={10} onChange={this.handleRate} value={rating} className="movie-rate" />
             </Col>
-          </Flex>
+          </Row>
         </Card>
       </ConfigProvider>
     );

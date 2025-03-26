@@ -4,16 +4,18 @@ import { Col, Input, Row, Spin, Pagination } from 'antd';
 import './MoviesList.css';
 import { Component } from 'react';
 import { debounce } from 'lodash';
-import { getMovies } from '../../services/themoviedb.js';
+import { TheMovieDBContext } from '../../context/themoviedb.jsx';
 
 class MoviesList extends Component {
+  static contextType = TheMovieDBContext;
+
   state = {
     movies: [],
     loading: false,
     error: false,
     totalCount: 0,
     currentPage: 1,
-    searchQuery: 'A',
+    searchQuery: 'Spiderman',
   };
 
   componentDidMount() {
@@ -27,7 +29,7 @@ class MoviesList extends Component {
   }
 
   handleChange = (e) => {
-    this.setState({ searchQuery: e.target.value }, () => {
+    this.setState({ currentPage: 1, searchQuery: e.target.value }, () => {
       this.fetchMovies(this.state.searchQuery, this.state.currentPage);
     });
   };
@@ -38,32 +40,27 @@ class MoviesList extends Component {
 
   async fetchMovies(query, page) {
     this.setState((prev) => ({ ...prev, loading: true, error: false }));
-    const data = await getMovies(query, page);
+    const { movies, totalResults } = await this.context.getMovies(query, page);
 
-    const movies = data.results.map((movie) => ({
-      title: movie.title,
-      poster: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
-      date: movie.release_date,
-      description: movie.overview,
-      genres: movie.genre_ids,
-      id: movie.id,
-      vote: movie.vote_average,
-    }));
     this.setState((prev) => ({
       ...prev,
       movies,
       loading: false,
-      totalCount: data.total_results,
+      totalCount: totalResults,
       error: movies.length === 0,
     }));
   }
   render() {
-    const { loading, movies, error, totalCount } = this.state;
+    const { searchQuery, loading, movies, error, totalCount } = this.state;
     const hasData = !loading && !error;
 
     return (
       <div className="movies-list">
-        <Input onChange={debounce(this.handleChange, 3000)} placeholder="Type to search..." />
+        <Input
+          onChange={debounce(this.handleChange, 3000)}
+          placeholder="Type to search..."
+          defaultValue={searchQuery}
+        />{' '}
         {error ? <Error /> : null}
         {loading ? (
           <div className="loader">
@@ -73,7 +70,7 @@ class MoviesList extends Component {
         {hasData ? (
           <Row gutter={[32, 32]}>
             {movies.map((movie) => (
-              <Col span={12} key={movie.id}>
+              <Col xl={12} key={movie.id}>
                 <MovieCard
                   id={movie.id}
                   title={movie.title}

@@ -1,10 +1,10 @@
+import { Tabs } from 'antd';
+import { Component } from 'react';
+import { Offline, Online } from 'react-detect-offline';
 import './App.css';
 import MoviesList from './components/MoviesList/MoviesList.jsx';
 import RatedList from './components/RatedList/RatedList.jsx';
-import { Online, Offline } from 'react-detect-offline';
-import TabsComponent from './components/Tabs/TabsComponent.jsx';
-import { SessionProvider } from './context/session.jsx';
-import { Component } from 'react';
+import { TheMovieDBProvider } from './context/themoviedb.jsx';
 
 class App extends Component {
   constructor() {
@@ -12,22 +12,32 @@ class App extends Component {
     this.state = {
       activeTab: 'Search',
     };
+
+    this.handleTabChange = this.handleTabChange.bind(this);
   }
 
   handleTabChange = (tab) => {
     this.setState({ activeTab: tab });
   };
   render() {
-    console.log(this.state.activeTab);
     return (
       <div>
         <Online>
-          <SessionProvider>
+          <TheMovieDBProvider>
             <div>
-              <TabsComponent onTabChange={this.handleTabChange} />
+              <Tabs
+                defaultActiveKey="1"
+                items={[
+                  { key: '1', label: 'Search' },
+                  { key: '2', label: 'Rated' },
+                ]}
+                onChange={(key) => this.handleTabChange(key === '1' ? 'Search' : 'Rated')}
+                centered
+                destroyInactiveTabPane={false}
+              />
               {this.state.activeTab === 'Rated' ? <RatedList /> : <MoviesList />}
             </div>
-          </SessionProvider>
+          </TheMovieDBProvider>
         </Online>
         <Offline>
           <div className="offline">

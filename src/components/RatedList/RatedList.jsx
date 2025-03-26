@@ -1,13 +1,12 @@
-import MovieCard from '../MovieCard/MovieCard.jsx';
-import Error from '../Error/Error.jsx';
 import { Col, Row, Spin, Pagination } from 'antd';
-import '../MoviesList/MoviesList.css';
 import { Component } from 'react';
-import { getRatedMovies } from '../../services/themoviedb.js';
-import { SessionContext } from '../../context/session.jsx';
+import { TheMovieDBContext } from '../../context/themoviedb.jsx';
+import Error from '../Error/Error.jsx';
+import MovieCard from '../MovieCard/MovieCard.jsx';
+import '../MoviesList/MoviesList.css';
 
 class RatedList extends Component {
-  static contextType = SessionContext;
+  static contextType = TheMovieDBContext;
   state = {
     movies: [],
     loading: false,
@@ -32,23 +31,13 @@ class RatedList extends Component {
 
   async fetchMovies() {
     this.setState((prev) => ({ ...prev, loading: true, error: false }));
-    const data = await getRatedMovies(this.context);
-
-    const movies = data.results.map((movie) => ({
-      title: movie.title,
-      poster: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
-      date: movie.release_date,
-      description: movie.overview,
-      genres: movie.genre_ids,
-      id: movie.id,
-      rating: movie.rating,
-      vote: movie.vote_average,
-    }));
+    const { movies, totalResults } = await this.context.getRatedMovies();
+    console.log(movies);
     this.setState((prev) => ({
       ...prev,
       movies,
       loading: false,
-      totalCount: data.total_results,
+      totalCount: totalResults,
       error: movies.length === 0,
     }));
   }
@@ -76,6 +65,7 @@ class RatedList extends Component {
                   date={movie.date}
                   rating={movie.rating}
                   vote={movie.vote}
+                  genres={movie.genres}
                 />
               </Col>
             ))}

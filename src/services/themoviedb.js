@@ -64,7 +64,9 @@ export async function getRatedMovies(guestSessionId) {
   });
 
   if (!response.ok) {
-    throw new Error(response.text());
+    return {
+      results: [],
+    };
   }
 
   return response.json();
