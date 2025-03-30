@@ -20,15 +20,15 @@ class MovieCard extends Component {
   }
 
   truncateString(str, maxLength) {
-    let truncatedString = '';
     if (str.split(' ').length > maxLength) {
-      truncatedString =
+      return (
         str
           .split(' ')
           .slice(0, maxLength - 1)
-          .join(' ') + '...';
+          .join(' ') + '...'
+      );
     }
-    return truncatedString;
+    return '';
   }
 
   render() {
