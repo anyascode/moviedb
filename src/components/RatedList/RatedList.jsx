@@ -1,87 +1,74 @@
 import { Col, Row, Spin, Pagination } from 'antd';
-import { Component } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { TheMovieDBContext } from '../../context/themoviedb.jsx';
 import Error from '../Error/Error.jsx';
 import MovieCard from '../MovieCard/MovieCard.jsx';
 import '../MoviesList/MoviesList.css';
 
-class RatedList extends Component {
-  static contextType = TheMovieDBContext;
-  state = {
-    movies: [],
-    loading: false,
-    error: false,
-    totalCount: 0,
-    currentPage: 1,
-  };
+function RatedList() {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  componentDidMount() {
-    this.fetchMovies(this.state.searchQuery, this.state.currentPage);
-  }
+  const context = useContext(TheMovieDBContext);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.currentPage !== prevState.currentPage) {
-      this.fetchMovies(this.state.searchQuery, this.state.currentPage);
+  useEffect(() => {
+    async function fetchMovies() {
+      setLoading(true);
+      setError(false);
+      const { movies, totalResults } = await context.getRatedMovies();
+      setMovies(movies);
+      setLoading(false);
+      setTotalCount(totalResults);
+      setError(movies.length === 0);
     }
+    fetchMovies();
+  }, [context]);
+
+  function handlePagination(pageNum) {
+    setCurrentPage(pageNum);
   }
 
-  handlePagination = (pageNum) => {
-    this.setState((prev) => ({ ...prev, currentPage: pageNum }));
-  };
+  const hasData = !loading && !error;
 
-  async fetchMovies() {
-    this.setState((prev) => ({ ...prev, loading: true, error: false }));
-    const { movies, totalResults } = await this.context.getRatedMovies();
-    this.setState((prev) => ({
-      ...prev,
-      movies,
-      loading: false,
-      totalCount: totalResults,
-      error: movies.length === 0,
-    }));
-  }
-  render() {
-    const { loading, movies, error, totalCount, currentPage } = this.state;
-    const hasData = !loading && !error;
-
-    return (
-      <div className="movies-list">
-        {error ? <Error /> : null}
-        {loading ? (
-          <div className="loader">
-            <Spin size="large" />
-          </div>
-        ) : null}
-        {hasData ? (
-          <Row gutter={[32, 32]}>
-            {movies.map((movie) => (
-              <Col span={12} key={movie.id}>
-                <MovieCard
-                  id={movie.id}
-                  title={movie.title}
-                  description={movie.description}
-                  posterUrl={movie.poster}
-                  date={movie.date}
-                  rating={movie.rating}
-                  vote={movie.vote}
-                  genres={movie.genres}
-                />
-              </Col>
-            ))}
-          </Row>
-        ) : null}
-        <Pagination
-          align="center"
-          defaultCurrent={1}
-          total={totalCount}
-          showSizeChanger={false}
-          pageSize={20}
-          onChange={this.handlePagination}
-          current={currentPage}
-        />
-      </div>
-    );
-  }
+  return (
+    <div className="movies-list">
+      {error ? <Error /> : null}
+      {loading ? (
+        <div className="loader">
+          <Spin size="large" />
+        </div>
+      ) : null}
+      {hasData ? (
+        <Row gutter={[32, 32]}>
+          {movies.map((movie) => (
+            <Col lg={12} key={movie.id}>
+              <MovieCard
+                id={movie.id}
+                title={movie.title}
+                description={movie.description}
+                posterUrl={movie.poster}
+                date={movie.date}
+                vote={movie.vote}
+                genres={movie.genres}
+              />
+            </Col>
+          ))}
+        </Row>
+      ) : null}
+      <Pagination
+        align="center"
+        defaultCurrent={1}
+        total={totalCount}
+        showSizeChanger={false}
+        pageSize={20}
+        onChange={handlePagination}
+        current={currentPage}
+      />
+    </div>
+  );
 }
 
 export default RatedList;

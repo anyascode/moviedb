@@ -1,5 +1,6 @@
+/* eslint-disable react-refresh/only-export-components */
 import { Spin } from 'antd';
-import { Component, createContext } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import * as themoviedb from '../services/themoviedb';
 
 const noop = () => {};
@@ -12,32 +13,24 @@ export const TheMovieDBContext = createContext({
   rateMovie: noop,
 });
 
-export class TheMovieDBProvider extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      genres: {},
-      ratings: {},
-      sessionId: '',
-      status: 'loading',
-    };
+export function TheMovieDBProvider({ children }) {
+  const [genres, setGenres] = useState({});
+  const [ratings, setRatings] = useState({});
+  const [sessionId, setSessionId] = useState('');
+  const [status, setStatus] = useState('loading');
 
-    this.getMovies = this.getMovies.bind(this);
-    this.getRatedMovies = this.getRatedMovies.bind(this);
-    this.rateMovie = this.rateMovie.bind(this);
-  }
+  useEffect(() => {
+    async function fetchData() {
+      const [genres, session] = await Promise.all([themoviedb.getGenres(), themoviedb.getGuestSession()]);
 
-  async componentDidMount() {
-    const [genres, session] = await Promise.all([themoviedb.getGenres(), themoviedb.getGuestSession()]);
-    this.setState((prev) => ({
-      ...prev,
-      genres: genres.reduce((acc, genre) => ({ ...acc, [genre.id]: genre.name }), {}),
-      sessionId: session.guest_session_id,
-      status: 'idle',
-    }));
-  }
+      setGenres(genres.reduce((acc, genre) => ({ ...acc, [genre.id]: genre.name }), {}));
+      setSessionId(session.guest_session_id);
+      setStatus('idle');
+    }
+    fetchData();
+  }, []);
 
-  async getMovies(query, page) {
+  async function getMovies(query, page) {
     const data = await themoviedb.getMovies(query, page);
 
     return {
@@ -49,15 +42,15 @@ export class TheMovieDBProvider extends Component {
           : `https://www.discountdisplays.co.uk/media/catalog/product/cache/d17dcbfbf201117ac0b96e975ab403a2/p/i/pink_green_coming_soon_poster_.png`,
         date: movie.release_date,
         description: movie.overview,
-        genres: movie.genre_ids.map((id) => this.state.genres[id]),
+        genres: movie.genre_ids.map((id) => genres[id]),
         id: movie.id,
         vote: movie.vote_average,
       })),
     };
   }
 
-  async getRatedMovies() {
-    const data = await themoviedb.getRatedMovies(this.state.sessionId);
+  async function getRatedMovies() {
+    const data = await themoviedb.getRatedMovies(sessionId);
 
     return {
       totalResults: data.total_results,
@@ -68,7 +61,7 @@ export class TheMovieDBProvider extends Component {
           : `https://www.discountdisplays.co.uk/media/catalog/product/cache/d17dcbfbf201117ac0b96e975ab403a2/p/i/pink_green_coming_soon_poster_.png`,
         date: movie.release_date,
         description: movie.overview,
-        genres: movie.genre_ids.map((id) => this.state.genres[id]),
+        genres: movie.genre_ids.map((id) => genres[id]),
         id: movie.id,
         rating: movie.rating,
         vote: movie.vote_average,
@@ -76,36 +69,28 @@ export class TheMovieDBProvider extends Component {
     };
   }
 
-  async rateMovie(movieId, rating) {
-    this.setState((prev) => ({
-      ...prev,
-      ratings: {
-        ...prev.ratings,
-        [movieId]: rating,
-      },
-    }));
-    return themoviedb.rateMovie(movieId, this.state.sessionId, rating);
+  async function rateMovie(movieId, rating) {
+    setRatings((prev) => ({ ...prev, [movieId]: rating }));
+    return themoviedb.rateMovie(movieId, sessionId, rating);
   }
 
-  render() {
-    return (
-      <TheMovieDBContext.Provider
-        value={{
-          genres: this.state.genres,
-          ratings: this.state.ratings,
-          getMovies: this.getMovies,
-          getRatedMovies: this.getRatedMovies,
-          rateMovie: this.rateMovie,
-        }}
-      >
-        {this.state.status === 'loading' ? (
-          <div className="loader">
-            <Spin size="large" />
-          </div>
-        ) : (
-          this.props.children
-        )}
-      </TheMovieDBContext.Provider>
-    );
-  }
+  return (
+    <TheMovieDBContext.Provider
+      value={{
+        genres: genres,
+        ratings: ratings,
+        getMovies: getMovies,
+        getRatedMovies: getRatedMovies,
+        rateMovie: rateMovie,
+      }}
+    >
+      {status === 'loading' ? (
+        <div className="loader">
+          <Spin size="large" />
+        </div>
+      ) : (
+        children
+      )}
+    </TheMovieDBContext.Provider>
+  );
 }
